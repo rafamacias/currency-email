@@ -1,0 +1,39 @@
+{
+  "name": "currency-email",
+  "version": "0.1.0",
+  "description": "Receive an email when the currency change",
+  "author": "Rafa Macias",
+  "homepage": "rafamacias.com/labs/currency-email",
+  "keywords": [
+    "currency",
+    "exchange",
+    "email",
+    "currency",
+    "exchange"
+  ],
+  "license": "MIT",
+  "main": "app.js",
+  "scripts": {
+    "start": "clear; node --harmony_arrow_functions app.js",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rafamacias/currency-email.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rafamacias/currency-email/issues"
+  },
+  "dependencies": {
+    "express": "^4.12.4",
+    "mongoose": "^4.0.3",
+    "nodemailer": "^1.3.4",
+    "request": "^2.55.0",
+    "socket.io": "^1.3.5",
+    "swig": "^1.4.2"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "jspm": "^0.15.6"
+  }
+}

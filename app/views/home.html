@@ -1,0 +1,16 @@
+{#
+This is a comment.
+It will be fully stripped and ignored during parsing.
+#}
+{% extends 'layout.html' %}
+
+{% block title %}{{page.title}}{% endblock %}
+
+{% block content %}
+<section id="home">
+	<form>
+		<input type="email" placeholder="{{home.placeholder}}" />
+		<button type="button">{{home.submit}}</button>
+	</form>
+</section>
+{% endblock %}
