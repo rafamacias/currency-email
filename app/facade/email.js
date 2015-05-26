@@ -34,6 +34,20 @@ class Email {
 // like: 'asd@example.com, info@exmp.com'
         if(options.to) {
 
+
+            ///REMOVEEEEEEE
+            setTimeout(function() {
+                if(Math.random().toString().search('3333') != -1) { //An error that could occur sometimes
+                    var err = new Error('FUCKKKKKKKKKKKKKKK An err');
+                    logger.error('Error happened: ' + err);
+                    return;
+                }
+
+                logger.log('FAKE EMAIL.EMAIL SENT TO :' + options.to);
+            }, 500);
+            return;
+            ///REMOVEEEEEEE
+
             return this._transporter.sendMail(this.mailOptions, function(err, info){
                 if (err) {
                     logger.error(err, className);

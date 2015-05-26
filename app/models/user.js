@@ -25,7 +25,7 @@ class User extends MongooseModelBase {
 		//  hash: { type: String, required: true },
 		    active: { type: Boolean, default: false},
 		    lastEmailSent: {type: Date},
-		    preferredCurrency: { type: String, required: true, trim: true},
+		    currency: { type: String, required: true, trim: true},
 		    created: {type: Date, default: Date.now}
 		});
 
@@ -34,7 +34,7 @@ class User extends MongooseModelBase {
 
 	getCurrenciesFromActiveUsers (callback) {
 
-		let field = 'currency.symbol',
+		let field = 'currency',
 			query = { active: true };
 
 		return super.selectDistinct(callback,field, query);
@@ -47,24 +47,39 @@ class User extends MongooseModelBase {
 			"$or" : [
 				{
 					"active" : true,
+					"currency": currencyName,
 					"lastEmailSent" : {
 						"$lte" : new Date()
 					}
 				},
 				{
 					"active" : true,
+					"currency": currencyName,
 					"lastEmailSent" : {
 						"$exists" : false
 					}
 				}
 			]
 		};
-		return super.selectDistinct(callback, 'email', query)
+
+		return super.selectDistinct((err, usersId) => {
+			if (err) throw err;
+
+			logger.log(usersId, 'Selecting active users with currencyName = ' + currencyName);
+
+			return this.ratesModel.getRatesMaxMinRatesByCurrency(usersId, currencyName, currencyRates, (err, usersEmails) => {
+
+				logger.log(usersEmails, 'usersEmails');
+
+]			});
+		}, '_id', query);
+
+		//return super.selectDistinct(callback, 'email', query)
 	}
 
-	addUser (email, preferredCurrency, rates, callback) {
+	addUser (email, currency, rates, callback) {
 
-		let user = { email, preferredCurrency };
+		let user = { email, currency };
 
 		//Looks weird because the callback goes first.
 	    super.insert(user, (err, userInserted) => {
