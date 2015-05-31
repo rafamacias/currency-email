@@ -13,7 +13,7 @@ let logger = helpers.logger;
 let dateUtils = helpers.date;
 
 var MongooseModelBase = require('./mongooseModelBase.js')
-var UserRates = require('./userRates.js')
+//var UserRates = require('./userRates.js')
 var className = 'USER_MODEL';
 
 class User extends MongooseModelBase {
@@ -26,10 +26,16 @@ class User extends MongooseModelBase {
 		    active: { type: Boolean, default: false},
 		    lastEmailSent: {type: Date},
 		    preferredCurrency: { type: String, required: true, trim: true},
+		    rates:
+		    	[{
+		    		symbol: { type: String, required: true},
+	    			min: { type: Number, min: 0.0000000001},
+	    			max: { type: Number, min: 0.0000000001}
+	    		},]
 		    created: {type: Date, default: Date.now}
 		});
 
-		this.ratesModel = new UserRates(dbConfig);
+		// this.ratesModel = new UserRates(dbConfig);
 	}
 
 	getCurrenciesFromActiveUsers (callback) {
@@ -41,6 +47,17 @@ class User extends MongooseModelBase {
 	}
 
 	getMatchingUsersByCurrency (currencyName, currencyRates, callback) {
+		
+		function matchResults (userRate) {
+			var rateValue = apiData.rates[userRate.currency];
+
+			if( (userRate.min && userRate.min > rateValue) || (userRate.max && userRate.max < rateValue) ) {
+				//log(userRate);
+				return true;
+			}
+			return false
+		}
+
 		let nowTS = Date.now();
 
 		let query = {
@@ -59,7 +76,29 @@ class User extends MongooseModelBase {
 				}
 			]
 		};
-		return super.selectDistinct(callback, 'email', query)
+
+		let aggregation = [
+			{$match: {active:true, favoriteCurrency : currencyName}},
+			{$unwind: '$rates'}
+		];
+
+		var cursor = super.model.aggregate(aggregation, (err, results) => {
+	    	if (err) throw err;
+
+			let users = [];
+
+			results.forEach((user) => {
+				for(let i = 0; user.rates.length; i++) {
+					if (matchResults(user.rates[i])) {
+						logger.log(user.email);
+
+						users.push(user);
+					}
+				}
+			});
+			callback(users);
+		});
+		//return super.selectDistinct(callback, 'email', query)
 	}
 
 	addUser (email, preferredCurrency, rates, callback) {
