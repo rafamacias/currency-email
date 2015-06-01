@@ -13,7 +13,7 @@ let logger = helpers.logger;
 let dateUtils = helpers.date;
 
 var MongooseModelBase = require('./mongooseModelBase.js')
-var UserRates = require('./userRates.js')
+//var UserRates = require('./userRates.js')
 var className = 'USER_MODEL';
 
 class User extends MongooseModelBase {
@@ -26,10 +26,16 @@ class User extends MongooseModelBase {
 		    active: { type: Boolean, default: false},
 		    lastEmailSent: {type: Date},
 		    currency: { type: String, required: true, trim: true},
+		    rates:
+		    	[{
+		    		symbol: { type: String, required: true},
+	    			min: { type: Number, min: 0.0000000001},
+	    			max: { type: Number, min: 0.0000000001}
+	    		},]
 		    created: {type: Date, default: Date.now}
 		});
 
-		this.ratesModel = new UserRates(dbConfig);
+		// this.ratesModel = new UserRates(dbConfig);
 	}
 
 	getCurrenciesFromActiveUsers (callback) {
@@ -41,6 +47,16 @@ class User extends MongooseModelBase {
 	}
 
 	getMatchingUsersByCurrency (currencyName, currencyRates, callback) {
+		
+		function matchResults (userRate) {
+			var rateValue = apiData.rates[userRate.currency];
+
+			if( (userRate.min && userRate.min > rateValue) || (userRate.max && userRate.max < rateValue) ) {
+				return true;
+			}
+			return false
+		}
+
 		let nowTS = Date.now();
 
 		let query = {
@@ -62,23 +78,48 @@ class User extends MongooseModelBase {
 			]
 		};
 
-		let thisToChage = this;
+// 		let thisToChage = this;
 
-		return super.select((err, users) => {
-			if (err) throw err;
+// 		return super.select((err, users) => {
+// 			if (err) throw err;
 
-			logger.log(users, 'Selecting active users with currencyName = ' + currencyName);
+// 			logger.log(users, 'Selecting active users with currencyName = ' + currencyName);
 
-			let usersId = [];
-			users.forEach(u => {
-				usersId.push(u['_id']);
+// 			let usersId = [];
+// 			users.forEach(u => {
+// 				usersId.push(u['_id']);
+// 			});
+
+// 			return thisToChage.ratesModel.getRatesMaxMinRatesByCurrency(usersId, currencyName, currencyRates, (err, usersEmails) => {
+// 				logger.log(usersEmails, 'usersEmails');
+// 			});
+// 		}, query);
+
+		let aggregation = [
+			{$match: {
+				active:true, 
+				currency : currencyName
+
+			}},
+			{$unwind: '$rates'}
+		];
+
+		var cursor = super.model.aggregate(aggregation, (err, results) => {
+	    	if (err) throw err;
+
+			let users = [];
+
+			results.forEach((user) => {
+				for(let i = 0; user.rates.length; i++) {
+					if (matchResults(user.rates[i])) {
+						logger.log(user.email);
+
+						users.push(user);
+					}
+				}
 			});
-
-			return thisToChage.ratesModel.getRatesMaxMinRatesByCurrency(usersId, currencyName, currencyRates, (err, usersEmails) => {
-				logger.log(usersEmails, 'usersEmails');
-			});
-		}, query);
-
+			callback(users);
+		});
 		//return super.selectDistinct(callback, 'email', query)
 	}
 
