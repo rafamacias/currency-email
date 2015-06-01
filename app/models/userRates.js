@@ -60,11 +60,12 @@ class UserRates extends MongooseModelBase {
 	}
 
 	getRatesMaxMinRatesByCurrency (usersId, currencyName, currencyRate, callback) {
+
 		let query = {
 			symbol: currencyName, // change to currency
-			min: {
-				glte: currencyRate
-			},
+			// min: {
+				// glte: currencyRate
+			// },
 			user: {
 				$in: usersId
 			}
@@ -72,11 +73,11 @@ class UserRates extends MongooseModelBase {
 
 
 
-		if (user['_id']) {
-			query = {'_id' : user['_id']};
-		}
+		// if (user['_id']) {
+		// 	query = {'_id' : user['_id']};
+		// }
 
-		return super.select(callback, );
+		return super.select(callback, query);
 	}
 }
 

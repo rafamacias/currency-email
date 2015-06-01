@@ -5,12 +5,16 @@
 	<title>{% block title %}Currency ExChange Email Sender{% endblock %}</title>
 
 	{% block head %}
-	<link rel="stylesheet" href="../public/css/main.css">
+	<link rel="stylesheet" href="css/main.css">
 	{% endblock %}
 </head>
 <body>
 	<header>This is the header</header>
 	<main>{% block content %}{% endblock %}</main>
-	<script async src="../public/js/main.js"></script>
+	<script src="jspm_packages/system.js"></script>
+  	<script src="config.js"></script>
+  	<script>
+    	System.import('js/main');
+  	</script>
 </body>
 </html>

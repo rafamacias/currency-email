@@ -62,17 +62,22 @@ class User extends MongooseModelBase {
 			]
 		};
 
-		return super.selectDistinct((err, usersId) => {
+		let thisToChage = this;
+
+		return super.select((err, users) => {
 			if (err) throw err;
 
-			logger.log(usersId, 'Selecting active users with currencyName = ' + currencyName);
+			logger.log(users, 'Selecting active users with currencyName = ' + currencyName);
 
-			return this.ratesModel.getRatesMaxMinRatesByCurrency(usersId, currencyName, currencyRates, (err, usersEmails) => {
+			let usersId = [];
+			users.forEach(u => {
+				usersId.push(u['_id']);
+			});
 
+			return thisToChage.ratesModel.getRatesMaxMinRatesByCurrency(usersId, currencyName, currencyRates, (err, usersEmails) => {
 				logger.log(usersEmails, 'usersEmails');
-
-]			});
-		}, '_id', query);
+			});
+		}, query);
 
 		//return super.selectDistinct(callback, 'email', query)
 	}
@@ -81,11 +86,13 @@ class User extends MongooseModelBase {
 
 		let user = { email, currency };
 
+		let thisToChage = this;
+
 		//Looks weird because the callback goes first.
 	    super.insert(user, (err, userInserted) => {
 	    	if (err) throw err;
 
-	   		return this.ratesModel.addUserRates(userInserted, rates, callback);
+	   		return thisToChage.ratesModel.addUserRates(userInserted, rates, callback);
 
 	    }, user );
 	}

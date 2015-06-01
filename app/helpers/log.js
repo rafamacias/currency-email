@@ -1,12 +1,18 @@
 'use strict';
-
+var chalk = require('chalk');
 class Log {
     constructor(debug) {
         this._debug = debug;
+        this._logFunction = {
+            log: chalk.black,
+            error: chalk.red,
+            warn: chalk.yellow,
+            info: chalk.blue
+        };
     }
 
-    log(msg, className) {
-        this._consoleLog('log', msg, className);
+    log(msg, msgHeader) {
+        this._consoleLog('log', msg, msgHeader);
     }
 
     /**
@@ -16,8 +22,8 @@ class Log {
      * @description
      * Write an information message
      */
-    info(msg, className) {
-        this._consoleLog('info', msg, className);
+    info(msg, msgHeader) {
+        this._consoleLog('info', msg, msgHeader);
     }
 
     /**
@@ -27,8 +33,8 @@ class Log {
      * @description
      * Write a warning message
      */
-    warn(msg, className) {
-        this._consoleLog('warn', msg, className);
+    warn(msg, msgHeader) {
+        this._consoleLog('warn', msg, msgHeader);
     }
 
     /**
@@ -38,13 +44,13 @@ class Log {
      * @description
      * Write an error message
      */
-    error(msg, className) {
-        this._consoleLog('error', msg, className);
+    error(msg, msgHeader) {
+        this._consoleLog('error', msg, msgHeader);
     }
 
     debug(msg) {
         if (this._debug) {
-            this._consoleLog('debug', msg, className);
+            this._consoleLog('debug', msg, msgHeader);
         }
     }
     _formatError(arg) {
@@ -64,10 +70,14 @@ class Log {
         // as the name implies
     }
 
-    _consoleLog(type, msg, className) {
+    _consoleLog(type, msg, msgHeader) {
 
-        if (className) console[type](`---- ${className} ----`);
+        if (msgHeader) {
+            //chalk.cyan(`---- ${msgHeader} ----`);  
+            //console[type](`---- ${msgHeader} ----`);  
+        }
 
+        //this._logFunction[type](msg);
         console[type](msg);
     }
 }
