@@ -6,6 +6,7 @@
  */
 
 var express = require('express');
+var bodyParser = require('body-parser')
 var Helpers = rootRequire('helpers');
 var logger = new Helpers().logger;
 var Routes = require('./routes');
@@ -33,6 +34,9 @@ class WebServer {
 		this.app.set('view engine', 'html');
 
 		this.app.set('views', config.paths.views);
+
+		this.app.use(bodyParser());
+
 
 		// Swig will cache templates for you, but you can disable
 		// that and use Express's caching instead, if you like:

@@ -9,7 +9,8 @@ let RatesApi = rootRequire('facade/ratesApiFake.js'); //Change when the API is O
 
 let Helpers = rootRequire('helpers');
 let logger = new Helpers().logger;
-
+var mongoose = require('mongoose');
+var DatabaseConnection = rootRequire('facade/db.js')
 
 let className = 'CURRENCY EXCHANGE';  //DEBUG purposes
 
@@ -19,7 +20,10 @@ class CurrencyRatesManager {
 		this._frequency = intervalFrequency;
 		this._currencies = null;
 
-		this._users = new Users(dbConfig);
+
+		this._dbConfig = dbConfig;
+
+		this._users = new Users();
 
 		this._email = new EmailManager(emailConfig);
 
@@ -53,27 +57,34 @@ class CurrencyRatesManager {
 			});
 		}
 
-		var thisToChange = this;
 
-		// Get the currencies of the users on initialization
-		this._users.getCurrenciesFromActiveUsers(function (err, currencies) {
-			if (err) {
-				logger.error('The server can\'t init', className);
-				logger.error(err, className);
-				return;
-			}
+		let thisToChange = this;
+		let db = new DatabaseConnection();
 
-			logger.info('Currencies received: ' + currencies);
+		db.connect(this._dbConfig.name, () => {
 
-			// Initialize the currencies and the API
-			thisToChange._currencies = new Currencies(currencies, thisToChange._ratesAPI);
+			// Get the currencies of the users on initialization
+			thisToChange._users.getCurrenciesFromActiveUsers(function (err, currencies) {
+				if (err) {
+					logger.error('The server can\'t init', className);
+					logger.error(err, className);
+					return;
+				}
 
-			// Receive the rates from the API and check the user
-			getCurrentRates();
+				logger.info('Currencies received: ' + currencies);
 
-			//Init the interval to get the curent rates
-			thisToChange._timeId = setInterval( getCurrentRates, thisToChange._frequency); 
+				// Initialize the currencies and the API
+				thisToChange._currencies = new Currencies(currencies, thisToChange._ratesAPI);
 
+				// Receive the rates from the API and check the user
+				getCurrentRates();
+
+				//Init the interval to get the curent rates
+				thisToChange._timeId = setInterval( getCurrentRates, thisToChange._frequency); 
+
+			});
+
+				
 		});
 
 		return this;

@@ -3,7 +3,7 @@ var Helpers = rootRequire('helpers');
 var helpers = new Helpers();
 var logger = helpers.logger;
 
-var User = rootRequire('models/user');
+var UsersController = rootRequire('currencyExchange/users');
 
 /**
  * Routes
@@ -14,6 +14,7 @@ class Api {
 	constructor (app, router) {
 		this.app = app;
 		this.router = router;
+		this.users = new UsersController();
 	}
 
 	init () {
@@ -23,25 +24,27 @@ class Api {
   			next();
 		});
 
+		let thisToChange = this;
+
 		this.router.route('/users')
 
 			.post(function(req, res) {
-				let user = new User(req.body);
-			 
-				user.addUser(function(err) {
-				  	if (err) return res.send(err);
-				 
-				    res.json({ message: 'User Added' });
-				});
+
+				logger.log(req.body, 'THE BODY IS ');
+
+				thisToChange.users.addUser(req.body, (err) => {
+					if (err) return res.send(err);
+
+					res.json({ message: 'User Added' });
+
+					//TODO: Add this functionality so the currency is added on runtime
+					//thisToChange.currencies.add(user.currency);
+				});				
 			})
 
 			.get(function (req, res) {
 
-				let user = new User({email: 'rafatest@test.com', currency: 'USD'});
-
-				console.log('get request');
-				console.log(User);
-				user.getAll(function(err, users) {
+				thisToChange.users.getAll(function(err, users) {
 					if (err) res.send(err);
 
 					res.json(users);

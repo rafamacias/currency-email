@@ -74,7 +74,7 @@ class Log {
 
         if (msgHeader) {
             //chalk.cyan(`---- ${msgHeader} ----`);  
-            //console[type](`---- ${msgHeader} ----`);  
+            console[type](`---- ${msgHeader} ----`);  
         }
 
         //this._logFunction[type](msg);

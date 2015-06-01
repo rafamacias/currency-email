@@ -10,42 +10,21 @@ var helpers = new Helpers();
 var logger = helpers.logger;
 
 class MongooseModelBase {
-	constructor(name, dbConfig, schema) {
-		this.db = dbConfig;
-		this.name = name;
-		this.schema = mongoose.Schema(schema);
-		
-		//find another name for model
-		this.model = mongoose.model(this.name, this.schema);
-		
-		//This can cause problems. Maybe is better to init the database at the beggining
-		if(!mongoose.connection.readyState) {
-			mongoose.connect(this.db.name, err => {
-	  			if (err) throw err;
-
-	  			logger.log('Database connected');
-			});
-		}
+	constructor(modelName) {
+		this.model = mongoose.model(modelName);
 	}
 
 	static getReferenceType () {
 		return mongoose.Schema.Types.ObjectId;
 	}
 
-	static disconnectDB (callback) {
-		mongoose.disconnect(err => {
-			if (err) throw err;
-			logger.log('Database disconnected');	
-			callback();
-		});
-	}
-
 	getModel () {
 		return this.model;
 	}
-
-	selectDistinct (callback, field, query) {
+	
+	selectDistinct (field, query, callback) {
 		if (!query) query = {}; //TODO: change to default paramaters
+
 		return this.model.distinct(field, query, function (err, values) {
 	       if (err) return callback(err);
 
@@ -53,7 +32,7 @@ class MongooseModelBase {
    	    });
 	}
 
-	count (callback, query) {
+	count (query, callback) {
 		if (!query) query = {};
 
 		return this.model.count(query, function (err, values) {
@@ -63,16 +42,17 @@ class MongooseModelBase {
    	    });
 	}
 
-	insert (callback, query) {
-		return this.model.insert(query, function (err, values) {
+	insert (query, callback) {
+		return this.model.save(query, function (err, values) {
 	       if (err) return callback(err);
 
 	       callback (null, values);
    	    });
 	}
 
-	delete (callback, query) {
+	delete (query, callback) {
 		if (!query) query = {};
+
 		return this.model.remove(query, function (err, values) {
 	       if (err) return callback(err);
 
@@ -80,8 +60,7 @@ class MongooseModelBase {
    	    });
 	}
 
-	select (callback, query, projection) {
-		if (!query) query = {};
+	select (query, projection, callback) {
 		if (!query) query = {};
 
 		return this.model.find(query, projection, function (err, values) {
@@ -89,6 +68,17 @@ class MongooseModelBase {
 
 	       callback (null, values);
    	    });
+	}
+
+	aggregate (aggregation, callback) {
+		if (!aggregation) aggregation = {};
+
+		return this.model.aggregate(aggregation, function (err, values) {
+	       if (err) return callback(err);
+
+	       callback (null, values);
+   	    });
+
 	}
 }
 

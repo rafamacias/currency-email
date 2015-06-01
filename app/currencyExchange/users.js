@@ -1,41 +1,53 @@
 'use strict';
-let Helpers = rootRequire('helpers');
-let logger = new Helpers().logger;
+var Helpers = rootRequire('helpers');
+var logger = new Helpers().logger;
 
-let UserModel = rootRequire('models/user.js');
+var Repository = rootRequire('facade/mongooseModelBase')
 
-let className = 'USERasdasdadS';  //DEBUG purposes
+var className = 'USERSSSSSS';  //DEBUG purposes
 
-class Users {
-	constructor (db) {
-		this._usersDAO = new UserModel(db);
+class Users extends Repository {
+	constructor () {
+		super('user');
+		//this.model = super.getModel();
 	}
 
 	/**
 	*
 	*/
-	add (user) {
-		this._usersDAO.addUser (user.email, user.currency, user.rates, (err, inserted) => {
+	addUser (user, callback) {
+
+		let UserModel = super.getModel();
+
+		let userModel = new UserModel(user);
+
+		userModel.save(function (err) {
+			if (err) return callback(err);
+		  	logger.log('New user saved in the DB');
+
+		  	return callback();
+		});
+	}
+
+
+	getAll (callback) {
+		super.select({}, (err, all) => {
 			if (err) return callback(err);
 
-			return callback(null ,inserted);	
+			return callback(null ,all);	
 		});
 	}
 
 	// Might not be needed until unsuscribe. Delete after being in Github
-	remove (user) {
-
-		this._usersDAO.removeUser (user.email, (err, removed) => {
-			if (err) return callback(err);
-
-			return callback(null ,removed);	
-		});
+	remove (user, callback) {
+		throw new Error ('Not yet implemented');
 	}
 
 	/**
 	*
 	*/
-	activate (userEmail) {
+	activate (userEmail, callback) {
+		throw new Error ('Not yet implemented');
 		this._usersDAO.updateToActive (userEmail, (err, updated) => {
 			if (err) return callback(err);
 
@@ -46,7 +58,8 @@ class Users {
 	/**
 	*
 	*/
-	emailIsSent (userEmail, date) {
+	emailIsSent (userEmail, date, callback) {
+		throw new Error ('Not yet implemented');
 		this._usersDAO.updateDateEmailSent (userEmail, date, (err, updated) => {
 			if (err) return callback(err);
 
@@ -56,7 +69,11 @@ class Users {
 
 
 	getCurrenciesFromActiveUsers (callback) {
-		this._usersDAO.getCurrenciesFromActiveUsers ((err, currencies) => {
+
+		let field = 'currency',
+			query = { active: true };
+
+		super.selectDistinct(field, query, (err, currencies) => {
 			if (err) return callback(err);
 
 			return callback(null ,currencies);	
@@ -79,13 +96,61 @@ class Users {
 
 			return emailList;
 		}
+		function matchResults (userRate) {
+			var rateValue = apiData.rates[userRate.currency];
 
-		this._usersDAO.getMatchingUsersByCurrency(currencyName, currencyRates, (err, users) => {
-			if (err) return callback(err);
+			if( (userRate.min && userRate.min > rateValue) || (userRate.max && userRate.max < rateValue) ) {
+				return true;
+			}
+			return false
+		}
 
-			let usersEmail = _extractEmailList(users);
+		let nowTS = Date.now();
 
-			return callback(null, users);
+		let query = {
+			"$or" : [
+				{
+					"active" : true,
+					"currency": currencyName,
+					"lastEmailSent" : {
+						"$lte" : new Date()
+					}
+				},
+				{
+					"active" : true,
+					"currency": currencyName,
+					"lastEmailSent" : {
+						"$exists" : false
+					}
+				}
+			]
+		};
+
+		let aggregation = [
+			{$match: {
+				active:true, 
+				currency : currencyName
+
+			}},
+			{$unwind: '$rates'}
+		];
+
+		//TODO: Change this to make the function simpler in the controller and not DB dependent
+		let cursor = super.aggregate(aggregation, (err, results) => {
+	    	if (err) throw err;
+
+			let users = [];
+
+			results.forEach((user) => {
+				for(let i = 0; user.rates.length; i++) {
+					if (matchResults(user.rates[i])) {
+						logger.log(user.email);
+
+						users.push(user);
+					}
+				}
+			});
+			callback(null, users);
 		});
 	}
 }

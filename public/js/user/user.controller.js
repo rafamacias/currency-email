@@ -1,42 +1,44 @@
 import fake from '../fake';
 
-var userService = fake.userService;
 var router = fake.router;
-
 
 class UserController {
 
-	constructor () {
+	constructor ($http) {
+
+        //TODO: make this available in the DB
 		this.currencies = ['GBP', 'EUR', 'JPY', 'USD'];
 
 		this.selectedItem = false;
 		this.selectedRates = [];
 
-	    this.rates = this.loadRates();
+	    this.rates = this._loadRates();
 	    this.user = {
-	    	email: 'rafakol@hotmail.com',
+	    	email: '',
 	    	currency: '',
 	    	rates: []
 	    };
    
+        this.$http = $http;
 	}
 
 	 /**
      * Search for rates.
      */
     querySearch (query) {
-      	return query ? this.rates.filter(this.createFilterFor(query)) : [];
+      	return query ? this.rates.filter(this._createFilterFor(query)) : [];
     }
     /**
      * Create filter function for a query string
      */
-   	createFilterFor(query) {
+   	_createFilterFor(query) {
       	let uppercaseQuery = angular.uppercase(query);
       	return function filterFn(rate) {
 			return (rate.name.indexOf(uppercaseQuery) === 0);
       	};
     }
-    loadRates() {
+    _loadRates() {
+        //TODO: make this available in the DB
       return [
         {
           'name': 'USD'
@@ -64,14 +66,27 @@ class UserController {
     	if (user && user.email) {
     		console.log('Adding to DB ' + user.email);
 
-    		userService.insert(user, (err, inserted) => {
-    			router.redirect('pending page')	
-    		});
+            //TODO: move to a service
+            this.$http.post('/api/v1/users', user).
+                success(function(data, status, headers, config) {
+                // this callback will be called asynchronously
+                // when the response is available
+
+                    console.log(data)
+                    console.log(status)
+                    console.log(headers)
+                    console.log(config)
+
+                    router.redirect('pending page') 
+                }).
+                error(function(data, status, headers, config) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                });
     	}
     }
-
 }
 
-UserController.$inject = [];
+UserController.$inject = ['$http'];
 
 export default UserController;
