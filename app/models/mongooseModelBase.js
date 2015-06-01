@@ -40,6 +40,10 @@ class MongooseModelBase {
 		});
 	}
 
+	getModel () {
+		return this.model;
+	}
+
 	selectDistinct (callback, field, query) {
 		if (!query) query = {}; //TODO: change to default paramaters
 		return this.model.distinct(field, query, function (err, values) {

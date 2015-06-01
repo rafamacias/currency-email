@@ -26,12 +26,11 @@ class User extends MongooseModelBase {
 		    active: { type: Boolean, default: false},
 		    lastEmailSent: {type: Date},
 		    currency: { type: String, required: true, trim: true},
-		    rates:
-		    	[{
+		    rates: [{
 		    		symbol: { type: String, required: true},
 	    			min: { type: Number, min: 0.0000000001},
 	    			max: { type: Number, min: 0.0000000001}
-	    		},]
+	    	}],
 		    created: {type: Date, default: Date.now}
 		});
 
@@ -104,7 +103,9 @@ class User extends MongooseModelBase {
 			{$unwind: '$rates'}
 		];
 
-		var cursor = super.model.aggregate(aggregation, (err, results) => {
+		let model = super.getModel();
+
+		let cursor = model.aggregate(aggregation, (err, results) => {
 	    	if (err) throw err;
 
 			let users = [];
@@ -121,6 +122,15 @@ class User extends MongooseModelBase {
 			callback(users);
 		});
 		//return super.selectDistinct(callback, 'email', query)
+	}
+
+	getAll (callback) {
+		super.count((err, userInserted) => {
+	    	if (err) throw err;
+
+	   		callback(userInserted);
+
+	    }, {});
 	}
 
 	addUser (email, currency, rates, callback) {

@@ -1,17 +1,21 @@
-import './vendor';
+import material from './vendor';
 import config from './config';
 
 import WebSocket from './websocket';
 
 import UserModule from './user/user.module';
 
-let mainModule = angular.module(config.appName, [
-    	UserModule.name,
-	])
-	.service(WebSocket.name, WebSocket);
 
 angular.element(document).ready(function() {
-	angular.bootstrap(document, [mainModule.name], { strictDi: true });
-});
 
-export default mainModule;
+	let body = document.getElementsByTagName("body")[0];
+
+	let app = angular.module(config.appName, [
+	    	material,
+	    	UserModule.name
+		])
+		.service(WebSocket.name, WebSocket);
+
+
+	angular.bootstrap(body, [app.name], { strictDi: true });
+});

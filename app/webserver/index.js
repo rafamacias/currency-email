@@ -9,6 +9,7 @@ var express = require('express');
 var Helpers = rootRequire('helpers');
 var logger = new Helpers().logger;
 var Routes = require('./routes');
+var Api = require('./api');
 var swig = require('swig');
 
 var className = 'WEBSERVER';
@@ -20,6 +21,7 @@ class WebServer {
 		this.app = express();
 
 		this.routes = new Routes(this.app);
+		this.api = new Api(this.app, express.Router())
 	}
 
 	init (callback) {
@@ -45,7 +47,10 @@ class WebServer {
 		
 		this.app.use(express.static(config.paths.static));
 
+  		this.api.init();
+
   		this.routes.init(this.app);
+
 		
   		let app= this.app;
   		this.app.listen(config.	port, function () {

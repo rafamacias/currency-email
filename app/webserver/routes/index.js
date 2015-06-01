@@ -10,9 +10,8 @@ var logger = helpers.logger;
  * @description
  */
 class Routes extends ExpressRouterBase {
-	constructor (app) {
-		super (app);
-		this.app = app;
+	constructor (app, router) {
+		super (app, router);
 	}
 
 	init () {

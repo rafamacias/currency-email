@@ -1,6 +1,43 @@
 <section class="user">
-    <form>
-        <input ng-model="vm.user.email" type="email" placeholder="<?=lang.user.placeholder?>" />
-        <button type="button" ng-click="vm.addUser(vm.user)"><?=lang.user.submit?></button>
+<style>
+    .md-chips .md-chip {
+        height: 170px;
+    }
+</style>
+    <form name="userForm">
+
+        <md-input-container>
+            <label for="email">Email</label>
+            <input name="email" id="email" type="email" ng-model="vm.user.email" tabindex="0" required aria-required="true" aria-invalid="true">
+        </md-input-container>
+       
+        <md-input-container>
+            <md-select id="currency" ng-model="vm.user.currency" placeholder="Select a currency" required aria-required="true" aria-invalid="true">
+                <md-option ng-value="currency" ng-repeat="currency in vm.currencies">{{ currency }}</md-option>
+            </md-select>
+        </md-input-container>
+
+
+        <md-chips ng-hide="!vm.user.currency" ng-model="vm.user.rates" md-autocomplete-snap md-require-match>
+            <md-autocomplete
+              md-selected-item="vm.selectedItem"
+              md-search-text="vm.searchText"
+              md-items="item in vm.querySearch(vm.searchText)"
+              md-item-text="item.name"
+              placeholder="Select currencies">
+                <span md-highlight-text="vm.searchText">{{item.name}}</span>
+            </md-autocomplete>
+            <md-chip-template>
+                <strong>{{$chip.name}}</strong>
+                <md-input-container>
+                    <input name="min" type="number" placeholder="Min" ng-model="$chip.min" value="$chip.min">
+                </md-input-container>
+                <md-input-container>
+                    <input name="max" type="number" placeholder="Max" ng-model="$chip.max" value="$chip.max">
+                </md-input-container>
+            </md-chip-template>
+        </md-chips>
+
+         <md-button aria-label="Submit the user" ng-disabled="(!vm.user.rates.length || userForm.$invalid)" ng-click="vm.addUser(vm.user)">submit</md-button>
     </form>
-</section>
+</section

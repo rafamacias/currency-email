@@ -1,7 +1,7 @@
 var userService = {
 	insert : function(user, callback) {
 		setTimeout(function () {
-			console.lgo('inserting user in DB: ' + user);
+			console.log('inserting user in DB: ' + user);
 			callback(user);
 		},10)
 	}
@@ -14,4 +14,8 @@ var router = {
 	}
 }
 
-export default {userService, router};
+var fake = {
+	userService,
+	router
+}
+export default fake;

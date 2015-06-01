@@ -39,7 +39,6 @@ class ExpressRouterBase {
  	}
 
 
-
  	get (requestConfig) {
  		this.app.get(requestConfig.path, function (req, res, next) {
 			res.render(requestConfig.template, requestConfig.template);
