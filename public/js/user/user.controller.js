@@ -1,10 +1,13 @@
-import fake from '../fake';
+import _ from 'lodash';
 
-var router = fake.router;
+var logger = console;
 
 class UserController {
 
-	constructor ($http) {
+	constructor ($http, $state, userService) {
+		this.$http = $http;
+		this.$state = $state;
+		this.userService = userService;
 
         //TODO: make this available in the DB
 		this.currencies = ['GBP', 'EUR', 'JPY', 'USD'];
@@ -12,14 +15,14 @@ class UserController {
 		this.selectedItem = false;
 		this.selectedRates = [];
 
-	    this.rates = this._loadRates();
 	    this.user = {
-	    	email: '',
-	    	currency: '',
-	    	rates: []
+	    	email: 'test@test.com',
+	    	currency: 'USD',
+	    	rates: [{
+	    		name: 'GBP',
+	    		min: 222
+	    	}]
 	    };
-   
-        this.$http = $http;
 	}
 
 	 /**
@@ -37,23 +40,19 @@ class UserController {
 			return (rate.name.indexOf(uppercaseQuery) === 0);
       	};
     }
-    _loadRates() {
-        //TODO: make this available in the DB
-      return [
-        {
-          'name': 'USD'
-        },{
-          'name': 'JPY'      
-        },{
-          'name': 'EUR'
-        },
-        {
-          'name': 'GBP'
-        },
-        {
-          'name': 'AUD'
-        }
-      ];
+
+    updateRates(currencySelected) {
+
+        let rates = _.without(this.currencies, currencySelected);
+       	let result = [];
+        rates.forEach(function (rate) {
+        	result.push({name :rate});
+        })
+
+	    // Remove the new currency selected from the user selection when it changes
+        _.remove(this.user.rates, {name:currencySelected})
+
+		this.rates = result;
     }
 
 
@@ -64,29 +63,22 @@ class UserController {
 
     addUser (user) {
     	if (user && user.email) {
-    		console.log('Adding to DB ' + user.email);
+    		logger.log('Adding to DB ' + user.email);
 
-            //TODO: move to a service
-            this.$http.post('/api/v1/users', user).
-                success(function(data, status, headers, config) {
-                // this callback will be called asynchronously
-                // when the response is available
+    		this.userService.addUser(user)
+	    		.then((data) => {
 
-                    console.log(data)
-                    console.log(status)
-                    console.log(headers)
-                    console.log(config)
+	                this.$state.go("pending", user);
 
-                    router.redirect('pending page') 
-                }).
-                error(function(data, status, headers, config) {
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
-                });
+	    		})
+	    		.error(() => {
+	    			logger.error('Error adding the user');
+	    			logger.info('please try again')
+	    		});
     	}
     }
 }
 
-UserController.$inject = ['$http'];
+UserController.$inject = ['$http', '$state', 'userService'];
 
 export default UserController;

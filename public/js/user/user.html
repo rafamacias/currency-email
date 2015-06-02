@@ -12,7 +12,7 @@
         </md-input-container>
        
         <md-input-container>
-            <md-select id="currency" ng-model="vm.user.currency" placeholder="Select a currency" required aria-required="true" aria-invalid="true">
+            <md-select id="currency" ng-model="vm.user.currency" placeholder="Select a currency" required aria-required="true" aria-invalid="true" ng-change="vm.updateRates(vm.user.currency)">
                 <md-option ng-value="currency" ng-repeat="currency in vm.currencies">{{ currency }}</md-option>
             </md-select>
         </md-input-container>
@@ -29,10 +29,10 @@
             <md-chip-template>
                 <strong>{{$chip.name}}</strong>
                 <md-input-container>
-                    <input name="min" type="number" placeholder="Min" ng-model="$chip.min" value="$chip.min">
+                    <input name="min" type="number" placeholder="Min" ng-model="$chip.min" value="$chip.min" step="any" min="0" aria-invalid="true">
                 </md-input-container>
                 <md-input-container>
-                    <input name="max" type="number" placeholder="Max" ng-model="$chip.max" value="$chip.max">
+                    <input name="max" type="number" placeholder="Max" ng-model="$chip.max" value="$chip.max" step="any" min="0" aria-invalid="true">
                 </md-input-container>
             </md-chip-template>
         </md-chips>

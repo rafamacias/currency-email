@@ -25,6 +25,7 @@ System.config({
     "babel-runtime": "npm:babel-runtime@5.4.7",
     "core-js": "npm:core-js@0.9.13",
     "css": "github:systemjs/plugin-css@0.1.11",
+    "lodash": "npm:lodash@3.9.3",
     "text": "github:systemjs/plugin-text@0.0.2",
     "github:angular-ui/ui-router@0.2.15": {
       "angular": "github:angular/bower-angular@1.4.0"
@@ -130,6 +131,9 @@ System.config({
     },
     "npm:inherits@2.0.1": {
       "util": "github:jspm/nodelibs-util@0.1.0"
+    },
+    "npm:lodash@3.9.3": {
+      "process": "github:jspm/nodelibs-process@0.1.1"
     },
     "npm:os-browserify@0.1.2": {
       "os": "github:jspm/nodelibs-os@0.1.0"
