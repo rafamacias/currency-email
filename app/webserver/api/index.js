@@ -17,7 +17,7 @@ class Api {
 		this.users = new UsersController();
 	}
 
-	init () {
+	init (io) {
 
 		this.router.use(function(req, res, next) {
   			// .. some logic here .. like any other middleware
@@ -47,6 +47,9 @@ class Api {
 				thisToChange.users.getAll(function(err, users) {
 					if (err) res.send(err);
 
+
+			  		//TODO: Move this from here to the confirmation email receiver.
+					io.emit('user:confirmation', 'rafa');
 					res.json(users);
 				});
 			});

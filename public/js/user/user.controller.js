@@ -4,8 +4,7 @@ var logger = console;
 
 class UserController {
 
-	constructor ($http, $state, userService) {
-		this.$http = $http;
+	constructor ($state, userService) {
 		this.$state = $state;
 		this.userService = userService;
 
@@ -79,6 +78,6 @@ class UserController {
     }
 }
 
-UserController.$inject = ['$http', '$state', 'userService'];
+UserController.$inject = ['$state', 'userService'];
 
 export default UserController;

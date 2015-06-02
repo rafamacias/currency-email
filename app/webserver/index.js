@@ -12,6 +12,8 @@ var logger = new Helpers().logger;
 var Routes = require('./routes');
 var Api = require('./api');
 var swig = require('swig');
+var socketIO = require('socket.io');
+
 
 var className = 'WEBSERVER';
 class WebServer {
@@ -51,16 +53,25 @@ class WebServer {
 		
 		this.app.use(express.static(config.paths.static));
 
-  		this.api.init();
-
-  		this.routes.init(this.app);
-
-		
   		let app= this.app;
-  		this.app.listen(config.	port, function () {
+  		let server = this.app.listen(config.	port, function () {
     		logger.log(`Now listening in port ${config.port}`, className);
     		callback()
   		});
+
+  		//TODO: Move this to a socket service
+  		var io = socketIO.listen(server);
+
+		io.on('connect', function(socket){
+				logger.log('a user connected', 'SOCKET');
+		});
+
+  		this.api.init(io);
+
+  		this.routes.init(this.app);
+
+
+
 	}
 }
 module.exports = WebServer;
