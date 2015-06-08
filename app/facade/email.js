@@ -23,7 +23,7 @@ class Email {
         };
     }
 
-    send (options,addresses, body) {
+    send (options, callback, fake) {
         // The own configuration for nodeMailer
         this.mailOptions.to         = options.to || '';
         this.mailOptions.subject    = options.subject || '';
@@ -36,25 +36,31 @@ class Email {
 
 
             ///REMOVEEEEEEE
-            setTimeout(function() {
-                if(Math.random().toString().search('3333') != -1) { //An error that could occur sometimes
-                    var err = new Error('FUCKKKKKKKKKKKKKKK An err');
-                    logger.error('Error happened: ' + err);
-                    return;
-                }
+            if(!fake) {
+                
+                setTimeout(function() {
+                    if(Math.random().toString().search('3333') != -1) { //An error that could occur sometimes
+                        var err = new Error('FUCKKKKKKKKKKKKKKK An err');
+                        logger.error('Error happened: ' + err);
+                        return callback(err);
+                    }
 
-                logger.log('FAKE EMAIL.EMAIL SENT TO :' + options.to);
-            }, 500);
-            return;
+                    logger.log('FAKE EMAIL.EMAIL SENT TO :' + options.to);
+                    callback(null, {response: 'fakeSent'});
+                }, 500);
+                return;
+            }
             ///REMOVEEEEEEE
 
             return this._transporter.sendMail(this.mailOptions, function(err, info){
                 if (err) {
                     logger.error(err, className);
-                } else {
-                    logger.log('Message sent: ' + info.response, className);
-                    logger.log(options.to);
+                    return callback(err);
                 }
+                logger.log('Message sent: ' + info.response, className);
+                logger.log(options.to);
+
+                callback(null, info);
             });
 
         } else {

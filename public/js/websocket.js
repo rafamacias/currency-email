@@ -7,14 +7,13 @@ class webSocket{
 
     constructor($rootScope) {
         this.$rootScope = $rootScope;
+        this.socket = io();
         this.init();
     }
 
     init () {
         let host = window.location.origin;
         logger.log("WEBSOCKET connecting to ", host);
-
-        this.socket = io.connect(host);
 
         this.socket.on('connect', () => {
             let sessionId = this.socket.io.engine.id;
@@ -38,11 +37,16 @@ class webSocket{
         });
     }
 
+    emit (key, data) {
+        logger.log("socket emit: ", key, data)
+        this.socket.emit(key, data) 
+    }
+
     on (key, callback) {
 
         this.socket.on(key, (data) => {
 
-            logger.log("on", key, data)
+            logger.log("socket on: ", key, data)
 
             this.$rootScope.$apply(() => {
                 callback(data)

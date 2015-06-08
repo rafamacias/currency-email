@@ -1,15 +1,19 @@
 'use strict';
+var className = 'USERSSSSSS';  //DEBUG purposes
+
 var Helpers = rootRequire('helpers');
 var logger = new Helpers().logger;
 
-var Repository = rootRequire('facade/mongooseModelBase')
+//TODO: Take a look at DI by intravenous http://www.royjacobs.org/intravenous/
+var Repository = rootRequire('facade/mongooseModelBase');
+var EmailManager = require('./email');
 
-var className = 'USERSSSSSS';  //DEBUG purposes
 
 class Users extends Repository {
 	constructor () {
 		super('user');
-		//this.model = super.getModel();
+
+		this.EmailManager = EmailManager;
 	}
 
 	/**
@@ -20,11 +24,23 @@ class Users extends Repository {
 		let UserModel = super.getModel();
 
 		let userModel = new UserModel(user);
+		
+		let thisToChange = this;
 
-		userModel.save(function (err) {
+		//TODO: check that the user.email doesn't exist already in the database
+		userModel.save((err) => {
 			if (err) return callback(err);
-		  	logger.log('New user saved in the DB');
+		  	
+		  	logger.info(`New user saved in the DB: ${user.email}`);
 
+		  	let emailManager = new thisToChange.EmailManager();
+		  	emailManager.sendConfirmationEmail(user, (err, data) => {
+
+		  	});
+
+		  	// Returning the callback in parallel make the proccess to the UI faster
+		  	// It might be good to try to resend or save the Email or inform the 
+		  	// user if the email couldn't be sent
 		  	return callback();
 		});
 	}

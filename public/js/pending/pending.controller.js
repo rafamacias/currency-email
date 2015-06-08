@@ -12,12 +12,14 @@ class PendingController {
         }
 
         webSocket.on('user:confirmation', (msg) => {
-	    	this.confirmUser()
+        	if (!msg.sessionId) {
+        		this.confirmUser();	
+        	}
 	  	});
   	}
 
 	confirmUser () {
-		this.$state.go('confirmation');
+		this.$state.go('confirmation', [{data: '1234'}]);
 	}
 
 }

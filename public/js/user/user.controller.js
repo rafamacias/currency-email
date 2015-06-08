@@ -59,7 +59,6 @@ class UserController {
     	return 'getCurrent User';
     }
 
-
     addUser (user) {
     	if (user && user.email) {
     		logger.log('Adding to DB ' + user.email);

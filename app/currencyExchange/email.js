@@ -1,18 +1,22 @@
 'use strict';
-let Helpers = rootRequire('helpers');
-let logger = new Helpers().logger;
+var className = 'EMAILMANAGER CLASS';  //DEBUG purposes
+
+var Helpers = rootRequire('helpers');
+var logger = new Helpers().logger;
+
+//TODO: Add dependency injection
+var config = require('../../config');
+var EmailSender = rootRequire('facade/email.js');
 
 /**
 *   Class Email Repository
 *   
 * 
 */
-
-let className = 'EMAILMANAGER CLASS';  //DEBUG purposes
 class EmailManager {
 
-    constructor (emailSender) {
-        this._emailSender = emailSender;
+    constructor () {
+        this._emailSender = new EmailSender(config.email);
     }
 
     _createBody (currencyName, currencyRates) {
@@ -41,6 +45,27 @@ class EmailManager {
                 Thanks for Using our services\n`;
     }
 
+    sendConfirmationEmail (user, callback) {
+        let mailOptions = {
+            to : user.email,
+            plaintText: 'http://localhost:3000/#/confirmation',
+            body: '<a href="http://localhost:3000/#/confirmation">http://localhost:3000/#/confirmation</a>'
+        };
+
+        // TODO: check that the user doesn't exist already, although this should
+        // be checked before
+        if(user.email) {
+            this._emailSender.send(mailOptions, function(err, info) {
+                if (err) {
+                    logger.error(err, className);
+                    return callback(err)
+                }
+               
+                logger.info(`Confirmation message sent to: ${user.email}. Response: ${info.response}`);
+                return callback(null, info);
+            }, true);
+        }
+    }
 
     send (to, currencyName, currencyRates) {
 

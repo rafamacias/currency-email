@@ -4,7 +4,6 @@ let Currencies = require('./currencies.js');
 let Users = require('./users.js');
 
 // DI
-let EmailSender = rootRequire('facade/email.js');
 let RatesApi = rootRequire('facade/ratesApiFake.js'); //Change when the API is OK :)
 
 let Helpers = rootRequire('helpers');
@@ -20,16 +19,15 @@ class CurrencyRatesManager {
 		this._frequency = intervalFrequency;
 		this._currencies = null;
 
-
 		this._dbConfig = dbConfig;
+
+		this.EmailManager = EmailManager;
+
+		this.DatabaseConnection = DatabaseConnection;
 
 		this._users = new Users();
 
-		this._email = new EmailManager(emailConfig);
-
 		this._ratesAPI = new RatesApi(apiConfig);  /// What is better pass the class or the instance????
-
-		this._emailSender = new EmailSender(emailConfig);
 	}
 
 	init () {
@@ -51,7 +49,7 @@ class CurrencyRatesManager {
 
 					logger.log(usersEmail, className);
 
-					let emailManager = new EmailManager(thisToChange._emailSender);
+					let emailManager = new thisToChange.EmailManager(thisToChange._emailSender);
 					emailManager.send(usersEmail, currencyName, currencyRates);
 				});
 			});
@@ -59,7 +57,7 @@ class CurrencyRatesManager {
 
 
 		let thisToChange = this;
-		let db = new DatabaseConnection();
+		let db = new this.DatabaseConnection();
 
 		db.connect(this._dbConfig.name, () => {
 

@@ -62,9 +62,34 @@ class WebServer {
   		//TODO: Move this to a socket service
   		var io = socketIO.listen(server);
 
-		io.on('connect', function(socket){
-				logger.log('a user connected', 'SOCKET');
+
+		io.on('connection', function(socket){
+			logger.log('socket connected');
+
+		  	socket.on('user:confirmed', function(msg){
+		  		logger.log('confirmed user : ' + msg);
+
+		    	io.emit('user:confirmation', msg);
+		  	});
 		});
+
+
+		// io.on('connect', function(socket){
+		// 	logger.log('a user connected', 'SOCKET');
+		// 	//logger.log(socket);
+
+		// 	io.on('user:confirmed', function(msg){
+		// 		logger.log('user confirmed ' + msg, 'SOCKET');
+
+		// 		io.emit("user:confirmation");
+		// 	});
+
+		// 	io.on('user:rafa', function (msg) {
+		// 		logger.log('user:rafa' + msg, 'SOCKET');
+		// 	});
+		// });
+
+		
 
   		this.api.init(io);
 
